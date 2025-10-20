@@ -1,0 +1,69 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:p="http://primefaces.org/ui">
+
+    <h:form id="frmUser">
+        <center>
+            <p:panel class="forms">
+                <p class="title">#{psychoManager.Usuario}</p>
+
+                <p:panelGrid columns="1" >
+                    <p:inputText id="dsNome" 
+                                 readonly="#{userHandler.isVisualizacao()}"
+                                 value="#{userHandler.selected.dsNome}" 
+                                 required="true" 
+                                 requiredMessage="#{requiredMessagesHandler.getCampoObrigatorio(requiredMessagesHandler.NOME)}"
+                                 maxlength="100" 
+                                 style="width:300px"                                 
+                                 pt:placeholder="#{psychoManager.Nome}"
+                                 pt:autofocus=""/>
+                    <p:inputText id="login" 
+                                 required="true" 
+                                 requiredMessage="#{requiredMessagesHandler.getCampoObrigatorio(requiredMessagesHandler.LOGIN)}"
+                                 readonly="#{userHandler.isVisualizacao() || userHandler.isAtualizacao()}"
+                                 value="#{userHandler.selected.userid}" 
+                                 maxlength="10" 
+                                 style="width:300px"
+                                 onkeyup="this.value = this.value.trim().toLowerCase();"
+                                 pt:placeholder="#{psychoManager.Login}">
+                    </p:inputText>
+                    <p:password id="senha" 
+                                readonly="#{userHandler.isVisualizacao()}"
+                                value="#{userHandler.selected.password}" 
+                                maxlength="32" 
+                                style="width:300px"
+                                pt:placeholder="#{psychoManager.Senha}" >
+                    </p:password>
+                    <p:password id="confirmar" 
+                                readonly="#{userHandler.isVisualizacao()}"
+                                value="#{userHandler.confirmPassword}" 
+                                maxlength="32" 
+                                style="width:300px"
+                                pt:placeholder="#{psychoManager.ConfirmeSuaSenha}">
+                    </p:password>
+                    <p:panelGrid columns="1">
+                        <p:selectManyCheckbox id="perfil" value="#{userHandler.selectedProfile}" disabled="${userHandler.isVisualizandoUserActive()||userHandler.isVisualizacao()}" >
+                            <f:selectItem itemLabel="#{psychoManager.Administrador}" itemValue="Adm" />
+                            <f:selectItem itemLabel="#{psychoManager.Usuario}" itemValue="User" />
+                        </p:selectManyCheckbox>
+                    </p:panelGrid>
+                </p:panelGrid>
+
+                <br/>
+                <p:messages id="messages" showDetail="false" autoUpdate="true" closable="true" />
+                <p:panel class="pnlButton" >
+                    <p:panelGrid columns="3">
+                        <p:commandButton value="#{psychoManager.Gravar}" action="#{userHandler.gravar()}"  rendered="#{!userHandler.isVisualizacao()}" update=":content"/>
+                        <p:commandButton value="#{psychoManager.Voltar}" action="#{userHandler.voltar()}" rendered="#{!userHandler.isVisualizandoUserActive()}" process="@this" update=":content"/>
+                        <p:commandButton value="#{psychoManager.Fechar}" action="#{userHandler.fechar()}" process="@this" update=":content"/>
+                    </p:panelGrid>
+                </p:panel>
+            </p:panel>
+        </center>                        
+    </h:form>
+
+</ui:composition>

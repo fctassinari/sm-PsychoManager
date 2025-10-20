@@ -1,0 +1,36 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://java.sun.com/jsp/jstl/core">
+    <f:view contentType="text/html" locale="#{languageHandler.locale}">
+        <!--<h:form id="frmMain">-->
+            <h:body>
+                <ui:insert name="header" >
+                    <ui:include src="/templates/includes/header.xhtml" />
+                </ui:insert> 
+
+                <ui:insert name="body">
+                </ui:insert>
+
+                <ui:insert name="footer" >
+                    <ui:include src="/templates/includes/footer.xhtml" />
+                </ui:insert> 
+
+                <ui:insert name="status">
+                    <p:ajaxStatus style="width:64px;height:64px;position:fixed;right:5px;bottom:5px">
+                        <f:facet name="start">
+                            <p:graphicImage name="default/1_0/images/animatedRing.gif" />
+                        </f:facet>
+
+                        <f:facet name="complete">
+                            <h:outputText value="" />
+                        </f:facet>
+                    </p:ajaxStatus>
+                </ui:insert>
+            </h:body> 
+        <!--</h:form>-->
+    </f:view>
+</ui:composition>
+

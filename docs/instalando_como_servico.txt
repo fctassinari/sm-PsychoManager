@@ -1,0 +1,33 @@
+Ir para a pasta
+	
+	/etc/init.d
+Criar o script glassfish abaixo neste formato para funcionar
+
+#!/bin/bash
+# description: Glassfish Start Stop Restart
+# processname: glassfish
+# chkconfig: 234 20 80
+
+case "$1" in
+start) 
+sh /sistemasIIDH/install/glassfish4/glassfish/bin/asadmin start-domain
+;;
+stop) 
+sh /sistemasIIDH/install/glassfish4/glassfish/bin/asadmin stop-domain
+;;
+restart) 
+sh /sistemasIIDH/install/glassfish4/glassfish/bin/asadmin stop-domain
+sh /sistemasIIDH/install/glassfish4/glassfish/bin/asadmin start-domain
+;;
+esac
+exit 0
+
+Executar os comando 
+
+	chmod 755 glassfish 
+	chkconfig --add glassfish 
+	chkconfig --level 234 glassfish on/off
+
+Para verificar
+
+	chkconfig --list

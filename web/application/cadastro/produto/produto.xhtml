@@ -1,0 +1,75 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:p="http://primefaces.org/ui">
+
+    <h:form id="frmProduto">
+        <center>
+            <p:panel class="forms">
+                <p class="title">#{psychoManager.Produto}</p>
+
+                <p:panelGrid columns="1" >
+                    <p:panelGrid columns="2" >
+                        <p:outputLabel value="#{psychoManager.NomeDoProduto}" for="dsNome" />                                    
+                        <p:inputText id="dsNome" 
+                                     readonly="#{produtoHandler.isVisualizacao()}"
+                                     value="#{produtoHandler.selected.dsNome}" 
+                                     maxlength="100" 
+                                     style="width: 500px" 
+                                     required="true" 
+                                     requiredMessage="#{requiredMessagesHandler.getCampoObrigatorio(requiredMessagesHandler.NOME)}"
+                                     pt:placeholder="#{psychoManager.NomeDoProduto}"
+                                     pt:autofocus=""/>
+                        <p:outputLabel value="#{psychoManager.Preco} 1" for="preco1" />                                    
+                        <p:inputNumber id="preco1" 
+                                       value="#{produtoHandler.selected.vlPreco1}" 
+                                       decimalSeparator="," 
+                                       thousandSeparator="."
+                                       symbol="#{psychoManager.$} " 
+                                       pt:placeholder="#{psychoManager.$}"/>
+                        <p:outputLabel value="#{psychoManager.Preco} 2" for="preco2" />                                    
+                        <p:inputNumber id="preco2"
+                                       readonly="#{produtoHandler.isVisualizacao()}"
+                                       value="#{produtoHandler.selected.vlPreco2}" 
+                                       decimalSeparator="," 
+                                       thousandSeparator="."
+                                       symbol="#{psychoManager.$} " 
+                                       pt:placeholder="#{psychoManager.$}"/>
+                        <p:outputLabel value="#{psychoManager.Preco} 3" for="preco3" />                                    
+                        <p:inputNumber id="preco3"
+                                       readonly="#{produtoHandler.isVisualizacao()}"
+                                       value="#{produtoHandler.selected.vlPreco3}" 
+                                       decimalSeparator="," 
+                                       thousandSeparator="."
+                                       symbol="#{psychoManager.$} " 
+                                       pt:placeholder="#{psychoManager.$}"/>
+                        <p:outputLabel value="#{psychoManager.Preco} 4" for="preco4" /> 
+                        <p:inputNumber id="preco4"
+                                       readonly="#{produtoHandler.isVisualizacao()}"
+                                       value="#{produtoHandler.selected.vlPreco4}" 
+                                       decimalSeparator="," 
+                                       thousandSeparator="."
+                                       symbol="#{psychoManager.$} " 
+                                       pt:placeholder="#{psychoManager.$}"/>
+                    </p:panelGrid>
+
+                </p:panelGrid>
+
+                <br/>
+                <!--<p:messages id="messages" showDetail="false" autoUpdate="true" closable="true" />-->
+                <p:messages id="messages" showDetail="false" closable="true" />
+                <p:panel class="pnlButton" >
+                    <p:panelGrid columns="3">
+                        <p:commandButton value="#{psychoManager.Gravar}" action="#{produtoHandler.gravar()}"  rendered="#{!produtoHandler.isVisualizacao()}" update=":content"/>
+                        <p:commandButton value="#{psychoManager.Voltar}" action="#{produtoHandler.voltar()}" process="@this" update=":content"/>
+                        <p:commandButton value="#{psychoManager.Fechar}" action="#{produtoHandler.fechar()}" process="@this" update=":content"/>
+                    </p:panelGrid>
+                </p:panel>
+            </p:panel>
+        </center>                        
+    </h:form>
+
+</ui:composition>

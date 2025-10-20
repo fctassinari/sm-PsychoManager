@@ -1,0 +1,66 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:p="http://primefaces.org/ui">
+
+    <h:form>
+        <center>
+            <p:panel class="forms">
+                <p class="title">#{psychoManager.CadastrarAlterarSenha}</p>
+                <p:panelGrid columns="1">
+                    <p:autoComplete id="paciente" 
+                                    value="#{senhaHandler.pacientesPartNameBean.nomePaciente}" 
+                                    completeMethod="#{senhaHandler.pacientesPartNameBean.getListaPacientesPartName}" 
+                                    minQueryLength="2"
+                                    queryDelay="500"
+                                    cache="true" 
+                                    cacheTimeout="30000"
+                                    inputStyle="width: 300px"
+                                    pt:placeholder="#{psychoManager.Paciente}"
+                                    pt:autofocus=""
+                                    requiredMessage="#{psychoManager.EscolhaUmPaciente}"
+                                    required="true">
+                        <p:ajax event="itemSelect" listener="#{senhaHandler.pacientesPartNameBean.onItemSelect}" />
+                    </p:autoComplete>
+
+                    <p:password    value="#{senhaHandler.password}" 
+                                   id="pass" 
+                                   style="width:300px"
+                                   title="#{psychoManager.DigiteSuaSenha}"
+                                   pt:placeholder="#{psychoManager.DigiteNovaSenha}"
+                                   match="conf"
+                                   required="true"
+                                   requiredMessage="#{requiredMessagesHandler.getCampoObrigatorio(requiredMessagesHandler.SENHA)}"
+                                   validatorMessage="#{psychoManager.OsCamposSenhaeConfirmacaoNaoConferem}"
+                                   feedback="true"
+                                   promptLabel="#{psychoManager.DigiteSuaSenha}" 
+                                   weakLabel="#{psychoManager.Fraca}"
+                                   goodLabel="#{psychoManager.Boa}" 
+                                   strongLabel="#{psychoManager.Forte}" />
+
+                    <p:password    value="#{senhaHandler.confirm}" 
+                                   id="conf" 
+                                   style="width:300px"
+                                   title="#{psychoManager.ConfirmeSuaSenha}"
+                                   pt:placeholder="#{psychoManager.ConfirmeNovaSenha}"
+                                   required="true"
+                                   requiredMessage="#{requiredMessagesHandler.getCampoObrigatorio(requiredMessagesHandler.CONFIRMAR)}"                                       />
+
+
+
+                    <br/>
+                    <p:messages id="messages" showDetail="false" autoUpdate="true" closable="true" />
+                    <p:panel class="pnlButton" >
+                        <p:panelGrid columns="2">
+                            <p:commandButton value="#{psychoManager.Gravar}" action="#{senhaHandler.gravar()}"/>
+                            <p:commandButton value="#{psychoManager.Fechar}" action="#{senhaHandler.fechar()}" process="@this" update=":content"/>
+                        </p:panelGrid>
+                    </p:panel> 
+                </p:panelGrid>
+            </p:panel>
+        </center>                        
+    </h:form>
+</ui:composition>

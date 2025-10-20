@@ -1,0 +1,31 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:c="http://java.sun.com/jsp/jstl/core">
+    <f:view contentType="text/html" locale="#{languageHandler.locale}">
+        <h:body>
+            <h:head>
+                <title>#{psychoManager.TituloSistema}</title>
+                <h:outputStylesheet library="default" name="css/psycho.css"/>	
+            </h:head>            
+            <h:form>
+                <center>
+                    <p:panel class="forms">
+                        <p class="title">#{psychoManager.Erro}</p>
+                        #{flash.keep.errorDetails}
+                        <p:outputLabel value="#{param['errorDetails']}"/>
+
+                        <p:panel class="pnlButton" >
+                            <p:panelGrid columns="1">
+                                <h:outputLink value="#{request.contextPath}/" class="title"><h:outputText value="#{psychoManager.VoltarAoSistema}" /></h:outputLink>
+                            </p:panelGrid>
+                        </p:panel>
+                    </p:panel>
+                </center>
+            </h:form>
+        </h:body> 
+    </f:view>
+</ui:composition>
+

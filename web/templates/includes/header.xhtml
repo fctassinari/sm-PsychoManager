@@ -1,0 +1,310 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+                xmlns:p="http://primefaces.org/ui"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough">
+    <h:head>
+        <title>#{psychoManager.TituloSistema}</title>
+        <h:outputStylesheet library="default" name="css/psycho.css"/>	
+        <h:outputStylesheet library="default" name="css/modalDialog.css" />
+        <h:outputScript library="default" name="js/primefacesLocale.js" />
+    </h:head>
+    <h:form id="frmHeader">
+        <div>
+            <p:panel id="menu" style="background: url('#{facesContext.externalContext.requestContextPath}/resources/default/1_0/images/watermark.png');">
+                <div id="topMenu">
+                    <div class="right-controls">
+                        <ul class="top-links">
+                            <li>
+                                <p:commandLink   action="#{languageHandler.changeLanguage('pt_BR')}" process="@this" update=":content,menu" > 
+                                    <p:graphicImage id="portugues" library="default" name="images/br.png" />
+                                </p:commandLink >
+                                <p:tooltip id="toolTipPort" for="portugues" value="Português" />
+                                <p:spacer width="2"/>
+                                <p:commandLink   action="#{languageHandler.changeLanguage('en')}" process="@this" update=":content,menu" >
+                                    <p:graphicImage id="english" library="default" name="images/en.png" />
+                                </p:commandLink >
+                                <p:tooltip id="toolTipEngl" for="english" value="English" />
+                            </li>
+                            <li>
+                                <i class="fa fa-user"/><h:outputText value="&#160;" />
+                                <p:commandLink value="#{(userHandler.pesquisarUsuarioLogado(request.getUserPrincipal())).getDsNome()}"
+                                               action="#{userHandler.editar(true)}" 
+                                               process="@this" 
+                                               update=":content"/>
+                            </li>
+                            <li>
+                                <!--<a href="#openModal"><i class="fa fa-power-off"/><h:outputText value="&#160;" />{psychoManager.Logout}</a>-->
+                                <i class="fa fa-power-off"/><h:outputText value="&#160;" />
+                                <p:commandLink value="#{psychoManager.Sair}" onclick="PF('popupSair').show();"/>
+                                <p:spacer width="6"/>
+
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="left-controls">
+                        <ul class="top-leftlinks">
+                            <li>
+                                <i class="fa fa-home"/><h:outputText value="&#160;" />
+                                <p:commandLink  rendered="#{request.getUserPrincipal() != null}"
+                                                action="#{navigationHandler.goHome()}" 
+                                                process="@this" 
+                                                update=":content"
+                                                value="#{psychoManager.Home}" />
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="logo">
+                    <h:graphicImage library="default" name="images/logo_tranparente_83x82.gif" />   
+                </div>
+
+                <div id="bottonMenu">
+                    <div class="left-controls">
+                    </div>
+                    <div class="right-controls">
+                        <ul class="top-links">
+                            <li>
+                                <!-- Existem 2 command aqui um para o font awesome ( <i class="fa fa-check"/> )e outro para o texto
+                                     Isso foi necessário pois qdo o menu não é renderizado o font era
+                                     deixando assim imagens perdidas na tela
+                                -->
+                                <p:commandLink action="#{navigationHandler.goAdministracao()}" 
+                                               rendered="#{facesContext.externalContext.isUserInRole('Adm')}"
+                                               process="@this" 
+                                               update=":content"
+                                               styleClass="fa fa-building">
+                                </p:commandLink>
+                                <p:spacer width="4"/>
+                                <p:commandLink action="#{navigationHandler.goAdministracao()}" 
+                                               rendered="#{facesContext.externalContext.isUserInRole('Adm')}"
+                                               process="@this" 
+                                               update=":content"
+                                               value="#{psychoManager.Administracao} |" >
+                                </p:commandLink>
+                            </li>
+                            <li>
+                                <p:commandLink action="#{navigationHandler.goConsultasEmAberto()}" 
+                                               rendered="#{facesContext.externalContext.isUserInRole('Adm')}"
+                                               process="@this" 
+                                               update=":content"
+                                               styleClass="fa fa-print">
+                                </p:commandLink>
+                                <p:spacer width="4"/>
+                                <p:commandLink action="#{navigationHandler.goConsultasEmAberto()}" 
+                                               rendered="#{facesContext.externalContext.isUserInRole('Adm')}"
+                                               process="@this" 
+                                               update=":content"
+                                               value="#{psychoManager.ConsultasEmAberto} |" >
+                                </p:commandLink>
+                            </li>
+                            <li>
+                                <p:commandLink action="#{navigationHandler.goPacientes()}" 
+                                               rendered="#{facesContext.externalContext.isUserInRole('Adm')}"
+                                               process="@this" 
+                                               update=":content"
+                                               styleClass="fa fa-heartbeat" >
+                                </p:commandLink>
+                                <p:spacer width="4"/>
+                                <p:commandLink action="#{navigationHandler.goPacientes()}" 
+                                               rendered="#{facesContext.externalContext.isUserInRole('Adm')}"
+                                               process="@this" 
+                                               update=":content"
+                                               value="#{psychoManager.Paciente} |" >
+                                </p:commandLink>
+                            </li>
+                            <li>
+                                <p:commandLink action="#{navigationHandler.goConfirmarPresenca()}" 
+                                               process="@this" 
+                                               update=":content"
+                                               styleClass="fa fa-thumbs-o-up">
+                                </p:commandLink>
+                                <p:spacer width="4"/>
+                                <p:commandLink action="#{navigationHandler.goConfirmarPresenca()}" 
+                                               process="@this" 
+                                               update=":content"
+                                               value="#{psychoManager.ConfirmarPresenca} |" >
+                                </p:commandLink>
+                            </li>
+                            <li>
+                                <p:commandLink action="#{navigationHandler.goSenhaPaciente()}" 
+                                               process="@this" 
+                                               update=":content"
+                                               styleClass="fa fa-exchange">
+                                </p:commandLink>
+                                <p:spacer width="4"/>
+                                <p:commandLink action="#{navigationHandler.goSenhaPaciente()}" 
+                                               process="@this" 
+                                               update=":content"
+                                               value="#{psychoManager.SenhaPaciente} |" >
+                                </p:commandLink>
+                            </li>
+                            <li>
+                                <p:commandLink action="#{navigationHandler.goProdutos()}" 
+                                               rendered="#{facesContext.externalContext.isUserInRole('Adm')}"
+                                               process="@this" 
+                                               update=":content"
+                                               styleClass="fa fa-wrench">
+                                </p:commandLink>
+                                <p:spacer width="4"/>
+                                <p:commandLink action="#{navigationHandler.goProdutos()}" 
+                                               rendered="#{facesContext.externalContext.isUserInRole('Adm')}"
+                                               process="@this" 
+                                               update=":content"
+                                               value="#{psychoManager.Produto} |" >
+                                </p:commandLink>
+                            </li>
+                            <li>
+                                <p:commandLink action="#{navigationHandler.goUsuarios()}" 
+                                               rendered="#{facesContext.externalContext.isUserInRole('Adm')}"
+                                               process="@this" 
+                                               update=":content"
+                                               styleClass="fa fa-group">
+                                </p:commandLink>
+                                <p:spacer width="4"/>
+                                <p:commandLink action="#{navigationHandler.goUsuarios()}" 
+                                               rendered="#{facesContext.externalContext.isUserInRole('Adm')}"
+                                               process="@this" 
+                                               update=":content"
+                                               value="#{psychoManager.Usuarios} |" >
+                                </p:commandLink>
+                            </li>
+                            <li>
+                                <p:commandLink action="#{navigationHandler.goPainelControle()}" 
+                                               process="@this" 
+                                               update=":content"
+                                               styleClass="fa fa-gear">
+                                </p:commandLink>
+                                <p:spacer width="4"/>
+                                <p:commandLink action="#{navigationHandler.goPainelControle()}" 
+                                               process="@this" 
+                                               update=":content"
+                                               value="#{psychoManager.PainelControle} |" >
+                                </p:commandLink>
+                            </li>
+                            <li>
+                                <p:commandLink action="#{navigationHandler.goPropriedades()}" 
+                                               rendered="#{facesContext.externalContext.isUserInRole('Adm')}"
+                                               process="@this" 
+                                               update=":content"
+                                               styleClass="fa fa-wrench">
+                                </p:commandLink>
+                                <p:spacer width="4"/>
+                                <p:commandLink action="#{navigationHandler.goPropriedades()}" 
+                                               rendered="#{facesContext.externalContext.isUserInRole('Adm')}"
+                                               process="@this" 
+                                               update=":content"
+                                               value="#{psychoManager.Propriedades} |" >
+                                </p:commandLink>
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+            </p:panel>
+            <div id="separator"/>
+            <p:idleMonitor
+                timeout="#{session.maxInactiveInterval * 1000 - 40000}"
+                onidle="startIdleMonitor()"
+                onactive="PF('timeoutDialog').hide();" />
+            <p:remoteCommand name="keepAlive" actionListener="#{loginHandler.keepSessionAlive}" />
+            <p:remoteCommand name="doLogout" action="#{loginHandler.logoutForAjax()}" process="@this" partialSubmit="true" immediate="true" />
+
+            <p:dialog position="top" styleClass="dialog" header="#{psychoManager.Confirmar}" widgetVar="popupSair"  modal="true" showEffect="clip" hideEffect="clip">
+                <center>
+                    <p:panel>
+                        <p class="titleExit">#{psychoManager.DesejaSairRealmete}?</p>
+                        <p:panel class="pnlButton" >
+                            <p:panelGrid columns="2">
+                                <p:commandButton action="#{loginHandler.logout()}" value="#{psychoManager.Sim}" icon="ui-icon-check"/>
+                                <p:commandButton value="#{psychoManager.Nao}" onclick="PF('popupSair').hide();" icon="ui-icon-close"/>
+                            </p:panelGrid>
+                        </p:panel>
+                    </p:panel>
+                </center>
+            </p:dialog>             
+
+
+            <p:dialog id="timeoutSession"
+                      styleClass="dialog"
+                      header="#{psychoManager.Atencao}"
+                      widgetVar="timeoutDialog"
+                      showEffect="fade" hideEffect="fade"
+                      modal="true"
+                      width="400"
+                      height="110"
+                      closable="false"
+                      draggable="false"
+                      resizable="false"
+                      onHide="stopCount()"
+                      onShow="doTimer()">
+                <br />
+                <p>
+                    <span class="ui-icon ui-icon-alert" style="float: left; margin: 8px 8px 0;"/>
+                    <p:panel>
+                        #{psychoManager.SuaSessaoIraExpirarEm}
+                        <span id="dialog-countdown" style="font-weight: bold"></span>
+                        #{psychoManager.segundos}
+                    </p:panel>
+                </p>
+                <br />
+                <p style="font-weight: bold;">#{msg['move.cursor']}</p>
+            </p:dialog>        
+        </div>
+    </h:form>
+    <script type="text/javascript">
+        
+        var TIME = 30; // in seconds
+        var countTimer = TIME;
+        var processTimer;
+        var timer_is_on = 0;
+        var redirectPage = "#{request.contextPath}/auth/j_verinice_timeout";
+
+        var countDownDiv = "dialog-countdown";
+        var txtCountDown = null;
+        if (!txtCountDown)
+            txtCountDown = document.getElementById(countDownDiv);
+
+        function startIdleMonitor() {
+            countTimer = TIME;
+            txtCountDown.innerHTML = countTimer;
+            PF('timeoutDialog').show();
+            //timeoutDialog.show();
+        }
+        /*        function timedCount() {
+         txtCountDown.innerHTML = countTimer;
+         if (countTimer == 0) {
+         stopCount();
+         window.location.href = redirectPage;
+         return;
+         }
+         countTimer = countTimer - 1;
+         processTimer = setTimeout("timedCount()", 1000);
+         //setInterval("timedCount()", 1000);
+         }*/
+        function timedCount() {
+            txtCountDown.innerHTML = countTimer;
+            if (countTimer > 0) {
+                countTimer = countTimer - 1;
+            } else {
+                clearInterval(processTimer);
+                doLogout();
+            }
+        }
+        function doTimer() {
+            if (!timer_is_on) {
+                timer_is_on = 1;
+                //timedCount();
+                processTimer = setInterval("timedCount()", 1000);
+            }
+        }
+        function stopCount() {
+            clearTimeout(processTimer);
+            timer_is_on = 0;
+            keepAlive();
+        }
+    </script>
+</ui:composition>

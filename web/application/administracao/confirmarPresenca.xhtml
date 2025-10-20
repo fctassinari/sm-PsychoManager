@@ -1,0 +1,92 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:p="http://primefaces.org/ui">
+
+    <h:form id="frmConfirmarPresenca">
+        <center>
+            <p:panel class="forms">
+                <p class="title">#{psychoManager.ConfirmarPresenca}</p>
+
+                <p:panelGrid columns="2" >
+                    <p:panelGrid columns="2">
+                        <p:autoComplete id="buscarNomePaciente" 
+                                        value="#{confirmarPresencaHandler.pacientesPartNameBean.nomePaciente}" 
+                                        completeMethod="#{confirmarPresencaHandler.pacientesPartNameBean.getListaPacientesPartName}" 
+                                        minQueryLength="2"
+                                        queryDelay="500"
+                                        cache="true" 
+                                        cacheTimeout="30000"
+                                        inputStyle="width: 300px"
+                                        required="true"
+                                        requiredMessage="#{psychoManager.EscolhaUmPaciente}"
+                                        pt:placeholder="#{psychoManager.Paciente}"
+                                        pt:autofocus="">
+                            <p:ajax event="itemSelect" listener="#{confirmarPresencaHandler.pacientesPartNameBean.onItemSelect}" />
+                        </p:autoComplete>
+                        <p:commandLink action="#{confirmarPresencaHandler.consultarPresencasNaoConfirmadas()}" update="table" title="#{psychoManager.Localizar}">
+                            <p:graphicImage library="default" name="images/views.png"/>
+                        </p:commandLink>   
+                    </p:panelGrid>
+                    <p:spacer width="1"/>
+
+                    <p:dataTable value="#{confirmarPresencaHandler.consultas}" var="item" id="table" emptyMessage="">
+                        <p:column style="width: 150px;" >
+                            <f:facet name="header">
+                                <p:outputLabel value="#{psychoManager.Data}"/>
+                            </f:facet>
+                            <p:outputLabel value="#{item.tbAgendaPK.dtConsulta}">
+                                <f:convertDateTime pattern="dd/MM/yyyy - HH:mm" timeZone="#{confirmarPresencaHandler.timezone}"/>
+                            </p:outputLabel>
+                        </p:column>
+                        <p:column style="width: 150px;">
+                            <f:facet name="header">
+                                <p:outputLabel value="#{psychoManager.Produto}"/>
+                            </f:facet>
+                            <p:outputLabel value="#{item.tbProduto.dsNome}"/>
+                        </p:column>
+                        <p:column style="width: 70px;">
+                            <f:facet name="header">
+                                <p:outputLabel value="#{psychoManager.Compareceu}"/>
+                            </f:facet>
+                            <p:selectBooleanCheckbox value="#{item.stPresenca}">
+                            </p:selectBooleanCheckbox>
+                        </p:column>
+                        <p:column style="width: 200px;">
+                            <f:facet name="header">
+                                <p:outputLabel value="#{psychoManager.Observacao}"/>
+                            </f:facet>
+                            <p:inputText id="dsObs" 
+                                         value="#{item.dsObs}" 
+                                         maxlength="100" 
+                                         pt:placeholder="#{psychoManager.Observacao}"/>                                            
+                        </p:column>
+                    </p:dataTable>
+                    <p:outputLabel value=""/>
+
+                    <p:password    value="#{confirmarPresencaHandler.senha}" 
+                                   id="senha" 
+                                   style="width:400px"
+                                   title="#{psychoManager.DigiteSuaSenha}"
+                                   pt:placeholder="#{psychoManager.DigiteSuaSenha}"
+                                   promptLabel="#{psychoManager.DigiteSuaSenha}" />
+                    <p:spacer width="1"/>
+                </p:panelGrid>
+
+                <br/>
+                <p:messages id="messages" showDetail="false" autoUpdate="true" closable="true" />
+                <p:panel class="pnlButton" >
+                    <p:panelGrid columns="2">
+                        <p:commandButton value="#{psychoManager.Gravar}" action="#{confirmarPresencaHandler.confirmPresence}"  update="table,buscarNomePaciente,senha"/>
+                        <p:commandButton value="#{psychoManager.Fechar}" action="#{confirmarPresencaHandler.fechar()}" process="@this" update=":content"/>                        
+                    </p:panelGrid>
+                </p:panel>
+
+            </p:panel>
+        </center>                        
+    </h:form>
+
+</ui:composition>

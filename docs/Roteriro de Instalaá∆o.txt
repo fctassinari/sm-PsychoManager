@@ -1,0 +1,448 @@
+ns1.iidh.com.br		186.202.161.16
+ns2.iidh.com.br		186.202.161.17
+
+
+
+
+
+Winscp / putty
+Protocolo	SFTP
+Host		35.193.163.21
+Port		22
+User		bitnami
+Pass		faka1609
+
+Mysql
+Protocolo	SFTP
+Host		localhost	*Necessário estar com o putty conectado com tunneling 
+Port		3306
+User		root
+Pass		zcxySB3Kn4jc
+
+WildFly
+Url			http://localhost:9990/console / http://35.193.163.21/index2.html
+User		manager
+Pass		zcxySB3Kn4jc
+
+-------------------------------------------------------------------------------------------------------------
+How To Start Or Stop The Services?
+Each Bitnami stack includes a control script that lets you easily stop, start and restart services. The script is located at /opt/bitnami/ctlscript.sh. Call it without any service name arguments to start all services:
+
+sudo /opt/bitnami/ctlscript.sh start
+Or use it to restart a single service, such as Apache only, by passing the service name as argument:
+
+sudo /opt/bitnami/ctlscript.sh restart apache
+Use this script to stop all services:
+
+sudo /opt/bitnami/ctlscript.sh stop
+Restart the services by running the script without any arguments:
+
+sudo /opt/bitnami/ctlscript.sh restart
+Obtain a list of available services and operations by running the script without any arguments:
+
+sudo /opt/bitnami/ctlscript.sh
+-------------------------------------------------------------------------------------------------------------
+
+Arquivo de configuração do Apache HTTP
+	/opt/bitnami/wildfly/conf/wildfly.conf
+
+Diretorio de conteudo
+	/opt/bitnami/wildfly/welcome-content
+	
+-------------------------------------------------------------------------------------------------------------
+
+
+1 - Criar Maquina virtual GoogleCloud
+	No menu Launcher escolher pilhas do desenvolvedor e procurar por WildFly
+	Criar a máquina 
+	Assign a static external IP address to your VM instance		https://cloud.google.com/compute/docs/ip-addresses/reserve-static-external-ip-address?&_ga=2.13208244.-262534153.1497114097#promote_ephemeral_ip
+	Após criada seguir a documentação para acessa-la			https://docs.bitnami.com/google/infrastructure/wildfly/
+																https://docs.bitnami.com/google/components/mysql/ 
+																Atenção: só consegui acessar o Mysql com o Workbench qdo fiz um tunel com o putty conforme demonstrado na documentação do wildfly 
+
+2 - Instalar MySql
+	Importar dados do Postgres para o MySql com o programa PSQLtoMYSQL.java
+	Obs: Campos boolean Postgres true e false -> MySql 0 = false, 1 = true
+
+3 - Instalar o WildFly
+	Criar usuario admin ara o WildFly
+		add-user.bat
+		
+4 - Configurar WildFly: http://wildfly.org/news/2014/02/06/GlassFish-to-WildFly-migration/
+	Trocar o acesso dos sistemas de localhost para qq endereço
+	substituir o trecho abaixo 
+        <interface name="public">
+            <inet-address value="${jboss.bind.address:127.0.0.1}"/>
+        </interface>
+	por
+		<interface name="public">
+            <any-address/>
+        </interface>
+	
+	Deloy driver mysql
+		Criar modulo
+			<?xml version="1.0" encoding="UTF-8"?>
+			<module xmlns="urn:jboss:module:1.1" name="com.mysql">
+				<resources>
+					<resource-root path="mysql-connector-java-5.1.44-bin.jar"/>              
+				</resources>
+				<dependencies>
+					<module name="javax.api"/>
+					<module name="javax.transaction.api"/>
+				</dependencies>
+			</module>
+			
+		Dentro do standalone.xml ficará assim
+			<deployments>
+				<deployment name="mysql-connector-java-5.1.44-bin.jar" runtime-name="mysql-connector-java-5.1.44-bin.jar">
+					<content sha1="c5c76a610587bde4af517e457bc66f8f0339caac"/>
+				</deployment>
+			</deployments>
+			
+	Criar datasource pelo console
+		no standalone.xml ficará assim:
+				<datasource jta="true" jndi-name="java:/jdbc/PsychoDS" pool-name="PsychoDS" enabled="true" use-ccm="true">
+					<connection-url>jdbc:mysql://127.0.0.1:3306/psychomanager?autoReconnect=true&amp;useSSL=false</connection-url>
+					<driver-class>com.mysql.jdbc.Driver</driver-class>
+					<driver>mysql-connector-java-5.1.44-bin.jar_com.mysql.jdbc.Driver_5_1</driver>
+					<pool>
+						<min-pool-size>1</min-pool-size>
+						<initial-pool-size>1</initial-pool-size>
+						<max-pool-size>2</max-pool-size>
+					</pool>
+					<security>
+						<user-name>root</user-name>
+						<password>12345678</password>
+					</security>
+					<validation>
+						<valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker"/>
+						<background-validation>true</background-validation>
+						<exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter"/>
+					</validation>
+				</datasource>
+				<drivers>
+					<driver name="h2" module="com.h2database.h2">
+						<xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
+					</driver>
+					<driver name="mysql" module="com.mysql">
+						<driver-class>com.mysql.jdbc.Driver</driver-class>
+					</driver>
+				</drivers>
+
+	Criar realm
+		Gerar senha
+			cd C:\Users\Tassinari\Documents\Ferramentas\wildfly-10.1.0\modules\system\layers\base\org\picketbox\main
+			
+			java -cp ./picketbox-4.9.6.Final.jar org.jboss.security.Base64Encoder 123 SHA-256
+					Com esta senha, Incluir pelo menos um usuário do arquivo QueriesMySql.sql
+
+		no standalone.xml ficará:
+			<security-domain name="psycho" cache-type="default">
+				<authentication>
+					<login-module code="Database" flag="required">
+						<module-option name="dsJndiName" value="java:/jdbc/PsychoDS"/>
+						<module-option name="principalsQuery" value="select password from tb_aut_user where userid=?"/>
+						<module-option name="rolesQuery" value="select groupid, 'Roles' from tb_aut_group ug where ug.userid = ?"/>
+						<module-option name="hashAlgorithm" value="SHA-256"/>
+						<module-option name="hashEncoding" value="BASE64"/>							
+						<module-option name="unauthenticatedIdentity" value="guest"/>
+					</login-module>
+					<login-module code="RoleMapping" flag="required">
+						<module-option name="rolesProperties" value="file:${jboss.server.config.dir}/psycho.properties"/>
+						<module-option name="replaceRole" value="false"/>
+					</login-module>
+				</authentication>
+			</security-domain>
+
+		Criar o arquiv psycho.properties em wildfly-10.1.0\standalone\configuration com o conteudo
+			vi psycho.properties
+				Adm=Adm
+				User=User
+			chown wildfly.wildfly psycho.properties
+
+5 - Criar as pastas abaixo:
+		
+		/sistemasIIDH
+			shared
+				appfiles
+					PsychoManager
+						pdf
+						reportfiles
+				libs
+					PsychoManager
+				logs
+					PsychoManager
+					
+		Executar o seguinte comando apos a criação das pastas
+		
+			chmod 777 -Rf /sistemasIIDH/
+	
+6 - Na pasta /sistemasIIDH/shared/appfiles/PsychoManager/pdf
+	
+		Copiar os arquivos pdf de ficha dos pacientes escaneadas
+		
+7 - Na pasta /sistemasIIDH/shared/libs/PsychoManager/
+
+		Criar o arquivo Config.properties com o conteudo abaixo:
+		
+			pdf_path=/sistemasIIDH/shared/appfiles/PsychoManager/pdf
+			timeZone=America/Sao_Paulo
+			file_report_path=/sistemasIIDH/shared/appfiles/PsychoManager/reportfiles
+			qtd_cols_dash=4
+			tempo_notificacao=2000
+
+		Criar o arquivo log4j.properties com o conteudo abaixo:
+		
+			#### Use Three appenders,
+			#stdout - is used for write to console
+			#R - is used for write to file
+			#ALL < DEBUG < INFO < WARN < ERROR < FATAL < OFF.
+			log4j.rootLogger=DEBUG, stdout, rootLogFile
+
+			# Print only messages of level WARN or above in the package
+			#This is use for debuging mode
+			log4j.logger.testlogging=DEBUG
+
+			#### Appender writes to console
+			log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+			log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+			log4j.appender.stdout.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %5p (%F:%L) - %m%n
+			 
+			#### Appender writes to a file
+			log4j.appender.rootLogFile=org.apache.log4j.RollingFileAppender
+			log4j.appender.rootLogFile.File=/sistemasIIDH/shared/logs/PsychoManager/PsychoManager.log
+			log4j.appender.rootLogFile.MaxFileSize=5000MB
+			log4j.appender.rootLogFile.MaxBackupIndex=10
+			log4j.appender.rootLogFile.layout=org.apache.log4j.PatternLayout
+			log4j.appender.rootLogFile.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %5p (%F:%L) - %m%n
+			#log4j.appender.rootLogFile.layout.ConversionPattern=%p %t %c - %m%n
+
+			#### Appender writes to a file
+			log4j.appender.modelLogFile=org.apache.log4j.DailyRollingFileAppender
+			log4j.appender.modelLogFile.File=/sistemasIIDH/shared/logs/PsychoManager/modelLogFile.log
+			log4j.appender.modelLogFile.DatePattern='.'yyyy-MM-dd
+			log4j.appender.modelLogFile.layout=org.apache.log4j.PatternLayout
+			log4j.appender.modelLogFile.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %5p - %m%n
+			#log4j.appender.modelLogFile.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %5p [%t] (%F:%L) - %m%n
+			#log4j.appender.modelLogFile.layout.ConversionPattern=%p %t %c - %m%n
+			# Print only messages of priority WARN or higher for your category
+			log4j.category.modelLogFile=DEBUB, modelLogFile
+			log4j.additivity.modelLogFile=false
+
+			# Hibernate logging options (INFO only shows startup messages)
+			log4j.logger.org.hibernate=ERROR
+			 
+			# Log JDBC bind parameter runtime arguments
+			log4j.logger.org.hibernate.type=TRACE		
+
+8 - Na pasta /sistemasIIDH
+
+		Criar o arquivo backupMysql.sh com o conteudo abaixo:
+		
+			#!/bin/sh
+			mysqldump  --defaults-extra-file=/sistemasIIDH/config.cnf --socket=/opt/bitnami/mysql/tmp/mysql.sock --host=localhost --databases psychomanager --add-drop-database > /sistemasIIDH/shared/backup/PsychoManager/bkpPsychoManager_`date "+%Y_%m_%d_%H_%M_%S"`.sql
+
+		Criar o arquivo restoreMysql.sh com o conteudo abaixo:
+		
+			#!/bin/sh
+			mysql --user=root --password=zcxySB3Kn4jc --host=localhost < <nome arq para restore>.sql
+
+9 - Configurar crontab para bkp do banco
+
+		Editar arquivo /etc/crontab e adicionar a linha
+		
+			00 01 * * * bitnami /sistemasIIDH/backupMysql.sh
+
+10 - Criar o modulo do mysql
+		Criar pasta ..\wildfly-10.1.0\modules\com\mysql\main
+		Criar arquivo module.xml com o conteudo abaixo:
+		
+			<?xml version="1.0" encoding="UTF-8"?>
+			<module xmlns="urn:jboss:module:1.3" name="com.mysql">
+				<resources>
+					<resource-root path="mysql-connector-java-5.1.44-bin.jar"/>              
+				</resources>
+				<dependencies>
+					<module name="javax.api"/>
+					<module name="javax.transaction.api"/>
+					<module name="javax.servlet.api" optional="true"/>
+				</dependencies>
+			</module>
+
+		Copiar o Jar do mysql para esta pasta
+		
+11 - Criar o modulo do jasperreports
+		Criar pasta ..\wildfly-10.1.0\modules\net\jasperreports\6.1.0.RELEASE
+		Criar arquivo module.xml com o conteudo abaixo:
+		
+		<?xml version="1.0" encoding="UTF-8"?>
+
+		<module xmlns="urn:jboss:module:1.3" name="net.jasperreports" slot="6.1.0.RELEASE">
+			<resources>
+				<resource-root path="commons-beanutils-1.9.2.jar"/>              
+				<resource-root path="commons-collections-3.2.1.jar"/>              
+				<resource-root path="commons-digester-2.1.jar"/>              
+				<resource-root path="commons-logging-1.2.jar"/>              
+				<resource-root path="groovy-all-2.0.1.jar"/>              
+				<resource-root path="iText-2.1.7.js2.jar"/>              
+				<resource-root path="jasperreports-6.1.0.jar"/>              
+			</resources>
+			<dependencies>
+				<module name="javax.api"/>
+				<module name="javax.transaction.api"/>
+			</dependencies>
+		</module>
+
+		Copiar o Jar do mysql para esta pasta
+		
+12 - Criar o modulo do primefaces
+		Criar pasta ..\wildfly-10.1.0\modules\org\primefaces\6.RELEASE
+		Criar arquivo module.xml com o conteudo abaixo:
+		
+		<?xml version="1.0" encoding="UTF-8"?>
+
+		<module xmlns="urn:jboss:module:1.3" name="org.primefaces" slot="6.RELEASE" >
+			<resources>
+				<resource-root path="all-themes-1.0.10.jar"/>              
+				<resource-root path="primefaces-6.0.jar"/>              
+			</resources>
+			<dependencies>  
+				  <module name="javax.faces.api" />  
+				  <module name="javax.api"/>  
+			 </dependencies>  	
+		</module>
+
+
+		Copiar o Jar do mysql para esta pasta
+		
+13 - Criar o modulo do springframework
+		Criar pasta ..\wildfly-10.1.0\modules\ 
+		Criar arquivo module.xml com o conteudo abaixo:
+		
+		<?xml version="1.0" encoding="UTF-8"?>
+
+		<module xmlns="urn:jboss:module:1.3" name="org.primefaces" slot="6.RELEASE" >
+			<resources>
+				<resource-root path="all-themes-1.0.10.jar"/>              
+				<resource-root path="primefaces-6.0.jar"/>              
+			</resources>
+			<dependencies>  
+				  <module name="javax.faces.api" />  
+				  <module name="javax.api"/>  
+			 </dependencies>  	
+		</module>
+
+
+		Copiar o Jar do mysql para esta pasta
+	
+14 - Configuração apache
+
+	Adicionar o trecho abaixo no arqivo /opt/bitnami/apache2/conf/bitnami/bitnami-apps-vhosts.conf para redirecionar para o site e redirecionar para a aplicação
+	
+	
+		<VirtualHost _default_:80>
+		   ServerAdmin localhost
+		   DocumentRoot /opt/bitnami/apache2/htdocs/iidh
+		   ServerName iidh.com.br
+
+		  <Directory "/opt/bitnami/apache2/htdocs/iidh">
+			Options FollowSymLinks MultiViews
+			AddLanguage en en
+			LanguagePriority en
+			ForceLanguagePriority Prefer Fallback
+
+			AllowOverride All
+			<IfVersion < 2.3 >
+			  Order allow,deny                          
+			  Allow from all
+			</IfVersion>
+			<IfVersion >= 2.3 >
+			  Require all granted
+			</IfVersion>
+		  </Directory>
+
+		  # Error Documents
+		  ErrorDocument 503 /503.html
+
+			#   ErrorLog logs/iidh.com.com-error_log	
+			#   CustomLog logs/iidh.com.-access_log common
+
+		  ProxyPass /PsychoManager http://localhost:8080/PsychoManager
+		  ProxyPassReverse /PsychoManager http://localhost:8080/PsychoManager
+
+		</VirtualHost>
+
+		Criar a pasta iidh em /opt/bitnami/apache2/htdocs
+		
+		Copiar o site para dentro da pasta /opt/bitnami/apache2/htdocs/iidh
+
+
+
+	
+	
+	
+	
+	
+46 14 * * bitnami /sistemasIIDH/backupMysql.sh
+
+24  0 * * * root /opt/bitnami/letsencrypt/certbot-auto renew
+16 12 * * * root /opt/bitnami/letsencrypt/certbot-auto renew
+
+
+
+	
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////qqq
+Alteraçoes nos outros sistemas para rodar no wildfly
+
+Excluir e tirar do web.xml o LoginFilter.java
+
+Em LoginHandler.logout() 
+substituir 					return "/index?faces-redirect=true";
+por 						return "/application/navigation?faces-redirect=true";
+
+
+	
+	
+	
+	
+	
+==================HTTPS================================================
+https://docs.bitnami.com/general/how-to/generate-install-lets-encrypt-ssl/
+https://docs.bitnami.com/general/components/apache/#how-to-publish-my-web-page
+https://docs.bitnami.com/general/components/apache/#How_to_create_a_Virtual_Host.3f
+https://certbot.eff.org/
+https://certbot.eff.org/docs/
+
+
+
+bitnami@psycho-vm:~$ sudo  /opt/bitnami/ctlscript.sh stop apache
+bitnami@psycho-vm:~$ sudo /opt/bitnami/letsencrypt/certbot-auto renew
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+
+-------------------------------------------------------------------------------
+Processing /etc/letsencrypt/renewal/iidh.com.br.conf
+-------------------------------------------------------------------------------
+Cert is due for renewal, auto-renewing...
+Plugins selected: Authenticator standalone, Installer None
+Renewing an existing certificate
+Performing the following challenges:
+tls-sni-01 challenge for iidh.com.br
+Waiting for verification...
+Cleaning up challenges
+
+-------------------------------------------------------------------------------
+new certificate deployed without reload, fullchain is
+/etc/letsencrypt/live/iidh.com.br/fullchain.pem
+-------------------------------------------------------------------------------
+
+-------------------------------------------------------------------------------
+
+Congratulations, all renewals succeeded. The following certs have been renewed:
+  /etc/letsencrypt/live/iidh.com.br/fullchain.pem (success)
+-------------------------------------------------------------------------------
+bitnami@psycho-vm:~$ sudo  /opt/bitnami/ctlscript.sh start apache
+Syntax OK
+/opt/bitnami/apache2/scripts/ctl.sh : httpd started at port 80
+Monitored apache
+bitnami@psycho-vm:~$
+	

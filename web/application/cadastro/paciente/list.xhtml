@@ -1,0 +1,88 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="http://java.sun.com/jsf/html"
+                xmlns:f="http://java.sun.com/jsf/core"
+                xmlns:ui="http://java.sun.com/jsf/facelets"
+                xmlns:c="http://java.sun.com/jsp/jstl/core"
+                xmlns:pt="http://xmlns.jcp.org/jsf/passthrough"
+                xmlns:p="http://primefaces.org/ui">
+
+    <h:form id="frmListPacitente">
+        <center>
+            <p:panel id="pnlUser" class="forms" >
+                <p class="title">#{psychoManager.Pacientes}</p>
+                <p:panelGrid>
+                    <p:panelGrid columns="2" >
+
+                        <p:inputText id="txtPesquisa" 
+                                     value="#{pacienteHandler.txtPesquisa}" 
+                                     maxlength="100" 
+                                     style="width: 500px" 
+                                     pt:placeholder="#{psychoManager.Nome}"
+                                     pt:autofocus=""/>
+                        <p:panelGrid columns="2">
+                            <p:commandLink action="#{pacienteHandler.pesquisarNome}" update="out" title="#{psychoManager.Localizar}">
+                                <h:graphicImage library="default" name="images/views.png"/>
+                            </p:commandLink>   
+                        </p:panelGrid>
+                    </p:panelGrid>
+
+                    <p:outputPanel id="out">
+                        <p:dataTable value="#{pacienteHandler.resultado}" var="item" id="table" rows="10" emptyMessage="" paginator="true">
+                            <p:column>
+                                <f:facet name="header">
+                                    <p:outputLabel value="#{psychoManager.NomePaciente}"/>
+                                </f:facet>
+                                <p:outputLabel value="#{item.dsNome}"/>
+                            </p:column>
+                            <p:column>
+                                <f:facet name="header">
+                                    <p:outputLabel value="#{psychoManager.Email}"/>
+                                </f:facet>
+                                <p:outputLabel value="#{item.dsEmail}"/>
+                            </p:column>
+                            <p:column>
+                                <f:facet name="header">
+                                    <p:outputLabel value="#{psychoManager.DataNascimento}"/>
+                                </f:facet>
+                                <p:outputLabel value="#{item.dtNascimento}">
+                                    <f:convertDateTime pattern="#{psychoManager.FormatoData}" />
+                                </p:outputLabel>
+                            </p:column>
+                            <p:column>
+                                <f:facet name="header">
+                                    <p:outputLabel value="#{psychoManager.Ficha}"/>
+                                </f:facet>
+                                <h:commandLink value="#{item.dsFicha}" action="#{pacienteHandler.downloadPDFLista}" target="_blank"/>                                                
+                            </p:column>
+                            <p:column>
+                                <f:facet name="header">
+                                    <p:spacer width="1"/>
+                                    <p:commandLink action="#{pacienteHandler.novo}" title="#{psychoManager.Novo}" process="@this" update=":content">
+                                        <p:graphicImage library="default" name="images/new-file.png"/>
+                                    </p:commandLink>
+                                </f:facet>
+                                <p:commandLink action="#{pacienteHandler.visualizar}"  title="#{psychoManager.Visualizar}" process="@this" update=":content">
+                                    <p:graphicImage library="default" name="images/views.png"/>
+                                </p:commandLink>
+                                <p:commandLink action="#{pacienteHandler.editar}"  title="#{psychoManager.Editar}" process="@this" update=":content">
+                                    <p:graphicImage library="default" name="images/edit-3.png"/>
+                                </p:commandLink>
+                                <p:commandLink  action="#{pacienteHandler.excluir}"  title="#{psychoManager.Apagar}" onclick="if (!confirm('#{psychoManager.DesejaRealmenteExcluirEstaInformacao}?'))
+                                            return false;">
+                                    <h:graphicImage library="default" name="images/trash-3.png"/>
+                                </p:commandLink>
+                            </p:column>
+
+                        </p:dataTable>
+                        <!--<p:dataScroller for="table" maxPages="5" fastStep="3"/>-->
+                    </p:outputPanel>
+                </p:panelGrid>
+                <br/>
+                <p:messages id="messages" showDetail="false" autoUpdate="true" closable="true" />
+                <p:panel class="pnlButton" >
+                    <p:commandButton value="#{psychoManager.Fechar}"  action="#{navigationHandler.goHome()}" process="@this" update=":content"/>
+                </p:panel>            
+            </p:panel>            
+        </center>                        
+    </h:form>
+</ui:composition>

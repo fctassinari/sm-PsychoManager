@@ -1,0 +1,5 @@
+ir na pasta /etc/rc6.d
+
+criar um link simbolico para o script de start
+
+ ln -s /sistemasIIDH/menuStart.sh /etc/rc6.d/StartGlassfish
