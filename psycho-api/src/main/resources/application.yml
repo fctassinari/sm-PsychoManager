@@ -1,0 +1,45 @@
+quarkus:
+  datasource:
+    db-kind: postgresql
+    username: psycho_manager
+    password: psycho_manager
+    jdbc:
+      url: jdbc:postgresql://localhost:5432/psycho_manager
+  
+  hibernate-orm:
+    database:
+      generation: update
+    log:
+      sql: true
+    sql-load-script: import.sql
+  
+  flyway:
+    migrate-at-start: true
+    baseline-on-migrate: true
+  
+  http:
+    cors: true
+    cors:
+      origins: "http://localhost:3000"
+      headers: "accept,authorization,content-type,x-requested-with"
+      methods: "GET,POST,PUT,DELETE,OPTIONS"
+    body-handler:
+      uploads-directory: uploads
+      delete-uploaded-files-on-end: false
+  
+  log:
+    level: INFO
+    category:
+      "br.com.iidh.psycho":
+        level: DEBUG
+  
+  swagger-ui:
+    always-include: true
+    path: /swagger-ui
+
+# Configurações da aplicação
+psycho:
+  manager:
+    pdf:
+      path: "./uploads/pdfs"
+    timezone: "America/Sao_Paulo"

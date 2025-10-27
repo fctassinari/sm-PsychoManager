@@ -1,0 +1,36 @@
+FROM registry.access.redhat.com/ubi10/nodejs-22:10.0-1755005674 AS builder
+
+USER root
+
+# Definir diretório de trabalho
+WORKDIR /app
+
+# Copiar arquivos de dependências
+COPY package*.json ./
+COPY tsconfig.json ./
+
+# Instalar dependências
+RUN npm install
+
+# Copiar código fonte
+COPY . .
+
+# Build da aplicação
+RUN npm run build
+
+# Estágio final - imagem de produção
+FROM registry.access.redhat.com/ubi10/nginx-126:10.0-1755015258 AS production
+
+# Copiar arquivos buildados do estágio anterior
+COPY --from=builder /app/build /usr/share/nginx/html
+
+# Copiar configuração personalizada do nginx
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Criar diretório para PID do nginx
+RUN mkdir -p /var/run/nginx
+
+EXPOSE 8080
+
+# Run script uses standard ways to run the application
+CMD nginx -g "daemon off;"
