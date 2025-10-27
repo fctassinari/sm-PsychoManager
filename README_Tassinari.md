@@ -35,7 +35,7 @@ podman run -d --name psycho-api -p 8081:8081 --network psycho-network  --volume 
 
 # Frontend 
 ```bash
-cd ../frontend
+cd ../psycho-web
 ```
 ```bash
 podman build -t psycho-web:latest .
